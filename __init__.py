@@ -91,7 +91,7 @@ class DeviceBro(QtWidgets.QWidget):
 
     @QtCore.Slot(object)
     def _on_awaker_message(self, data):
-        print(data)
+        print("algo llego")
 
     def _lunch_brother(self, device):
         print("trying to lunch bro at address: " + device.ip)
