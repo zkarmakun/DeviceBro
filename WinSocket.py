@@ -176,6 +176,9 @@ class CommAwaker(QtCore.QThread):
         self.listener_socket = None
         self.communication_socket = None
         self.start()
+
+    def get_awaker_port(self):
+        return self.port
     
     def close_connection(self):
         self._exiting = True
@@ -192,9 +195,7 @@ class CommAwaker(QtCore.QThread):
 
     def send_to(self, message, ip_address):
         if self.communication_socket:
-            msg_bytes = bytearray(len(message).to_bytes(4, byteorder="little"))
-            msg_bytes.extend(message.encode())
-            self.communication_socket.sendto((msg_bytes, (ip_address, self.port)))
+            self.communication_socket.sendto((message.encode(), (ip_address, self.port)))
 
     def run(self):
         self.communication_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

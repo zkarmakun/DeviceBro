@@ -7,6 +7,7 @@ import ctypes
 import numpy
 import pickle
 import cv2
+from functools import partial
 
 #% /Applications/Xcode.app/Contents/Developer/usr/bin/pip3 ; exit;
 def get_resource_path():
@@ -86,7 +87,15 @@ class DeviceBro(QtWidgets.QWidget):
         self.save = load_options(get_save_path())
         self.update_devices_list()
         self.awaker = WinSocket.CommAwaker()
+        self.awaker.on_message.connect(self._on_awaker_message)
 
+    @QtCore.Slot(object)
+    def _on_awaker_message(self, data):
+        print(data)
+
+    def _lunch_brother(self, device):
+        print("trying to lunch bro at address: " + device.ip)
+        self.awaker.send_to("que pedo mi buen", device.ip)
 
     def _setup_tray_app(self):
         tray_icon = QtWidgets.QSystemTrayIcon(self)
@@ -118,6 +127,7 @@ class DeviceBro(QtWidgets.QWidget):
         for device in self.save.devices:
             button = QtWidgets.QPushButton("")
             button.setFixedSize(70,70)
+            button.clicked.connect(partial(self._lunch_brother, device))
             icon = device.get_icon()
             button.setIconSize(QtCore.QSize(self.icon_size[0],self.icon_size[0]))
             button.setIcon(icon)
