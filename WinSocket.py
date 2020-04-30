@@ -4,7 +4,7 @@ import os
 from PySide2 import QtWidgets, QtCore, QtGui
 import time
 import struct
-
+import json
 import threading
 import uuid
 
@@ -14,9 +14,37 @@ try:
 except:
     pass
 
+class Jsonizer(object):
+    '''
+        base clase to serialize children as json objects
+    '''
+
+    def __init__(self):
+        self.type = "message"
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+def from_json(item, json_string):
+    '''
+        dumps json string into some random object
+    '''
+    json_dict = json.loads(json_string)
+    for key in json_dict:
+        try:
+            setattr(item, key, json_dict[key])
+        except:
+            #in case the attr does not exist
+            pass
+
+def get_message_type(json_text):
+    json_dict = json.loads(json_text)
+    for key in json_dict:
+        if key == "type":
+            return json_dict[key]
+    return "invalid"
 
 PORT = 8080
-win = 0
 
 def recv_all(socket, n):
     data = bytearray()
@@ -166,7 +194,7 @@ class CommServer(QtCore.QThread):
 
 class CommAwaker(QtCore.QThread):
 
-    on_message = QtCore.Signal(object) 
+    on_message = QtCore.Signal(str) 
 
     def __init__(self, parent = None):
         QtCore.QThread.__init__(self, parent)
@@ -179,6 +207,9 @@ class CommAwaker(QtCore.QThread):
 
     def get_awaker_port(self):
         return self.port
+
+    def get_awaker_host(self):
+        return self.host
     
     def close_connection(self):
         self._exiting = True
@@ -207,7 +238,7 @@ class CommAwaker(QtCore.QThread):
         while not self._exiting:
             try:
                 data, addr = self.listener_socket.recvfrom(2048)
-                self.on_message.emit(data)
+                self.on_message.emit(data.decode())
                 print(data)
             except:
                 pass

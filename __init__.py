@@ -67,6 +67,12 @@ class DeviceDescription(object):
         picture = QtGui.QPixmap(image_profile)
         return QtGui.QIcon(picture)
 
+class AwakeMessage(WinSocket.Jsonizer):
+
+    def __init__(self, requester_address):
+        super(AwakeMessage, self).__init__()
+        self.requester_address = requester_address
+
 class DeviceBro(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
@@ -84,18 +90,25 @@ class DeviceBro(QtWidgets.QWidget):
         self._setup_tray_app()
         self.icon_size = (100,100)
 
-        self.save = load_options(get_save_path())
-        self.update_devices_list()
+        
         self.awaker = WinSocket.CommAwaker()
         self.awaker.on_message.connect(self._on_awaker_message)
 
-    @QtCore.Slot(object)
-    def _on_awaker_message(self, data):
-        print("algo llego")
+        self.save = load_options(get_save_path())
+        self.update_devices_list()
+
+    @QtCore.Slot(str)
+    def _on_awaker_message(self, msg):
+        msg_type = WinSocket.get_message_type(msg)
+        print(msg_type)
 
     def _lunch_brother(self, device):
-        print("trying to lunch bro at address: " + device.ip)
-        self.awaker.send_to("que pedo mi buen", device.ip)
+        if device.ip != self.awaker.get_awaker_host():
+            print("trying to lunch bro at address: " + device.ip)
+            requester = AwakeMessage(self.awaker.get_awaker_host())
+            self.awaker.send_to(requester.to_json(), device.ip)
+        else:
+            print("invalid ip, same as host")
 
     def _setup_tray_app(self):
         tray_icon = QtWidgets.QSystemTrayIcon(self)
@@ -125,6 +138,9 @@ class DeviceBro(QtWidgets.QWidget):
             self.body_layout.itemAt(i).widget().close()
 
         for device in self.save.devices:
+            if device.ip == self.awaker.get_awaker_host():
+                continue
+
             button = QtWidgets.QPushButton("")
             button.setFixedSize(70,70)
             button.clicked.connect(partial(self._lunch_brother, device))
