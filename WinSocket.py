@@ -8,8 +8,11 @@ import struct
 import threading
 import uuid
 
-from _pydev_bundle import pydev_monkey_qt
-pydev_monkey_qt.patch_qt('auto')
+try:
+    from _pydev_bundle import pydev_monkey_qt
+    pydev_monkey_qt.patch_qt('auto')
+except:
+    pass
 
 
 PORT = 8080

@@ -1,32 +1,14 @@
 import socket
 import sys
 import os
-from win10toast import ToastNotifier
-from PySide2 import QtWidgets, QtCore, QtGui
 import WinSocket
+from PySide2 import QtWidgets, QtCore, QtGui
 import ctypes
 import numpy
 import pickle
 import cv2
-import WinSocket
 
-def toast_connection(client):
-    toaster = ToastNotifier()
-    toaster.show_toast("New device connected",
-                    "client description",
-                    icon_path=None,
-                    duration=5,
-                    threaded=True)
-                    
-
-def toast_welcomer():
-    toaster = ToastNotifier()
-    toaster.show_toast("Staring Py Win Controller",
-                    "have fun!!!!",
-                    icon_path=None,
-                    duration=5,
-                    threaded=True)   
-
+#% /Applications/Xcode.app/Contents/Developer/usr/bin/pip3 ; exit;
 def get_resource_path():
     return os.path.dirname(os.path.realpath(__file__)).replace('\\',  '/') 
 
@@ -181,8 +163,10 @@ class DeviceBro(QtWidgets.QWidget):
             save_options(self.save, get_save_path())
             self.update_devices_list()
 
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     widget = DeviceBro()
     widget.show()
     sys.exit(app.exec_())
+    
